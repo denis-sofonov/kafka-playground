@@ -17,16 +17,31 @@ func main() {
 	}
 	defer client.Close()
 
-	record := &kgo.Record{
-		Topic: "orders",
-		Value: []byte("hello kafka"),
+	keys := []string{"user-1", "user-2", "user-3"}
+
+	var records []*kgo.Record
+	for i := 0; i < 9; i++ {
+		key := keys[i%len(keys)]
+		records = append(records, &kgo.Record{
+			Topic: "orders",
+			Key:   []byte(key),
+			Value: []byte(fmt.Sprintf("order-%d", i)),
+		})
 	}
 
 	ctx := context.Background()
-	res, err := client.ProduceSync(ctx, record).First()
-	if err != nil {
-		log.Fatalf("failed to produce: %v", err)
-	}
+	results := client.ProduceSync(ctx, records...)
 
-	fmt.Printf("sent: partition=%d offset=%d\n", res.Partition, res.Offset)
+	for _, res := range results {
+		if res.Err != nil {
+			log.Printf("failed to produce: %v", res.Err)
+			continue
+		}
+
+		fmt.Printf("sent: key=%s value=%s partition=%d offset=%d\n",
+			res.Record.Key,
+			res.Record.Value,
+			res.Record.Partition,
+			res.Record.Offset)
+	}
 }
