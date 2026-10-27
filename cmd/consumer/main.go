@@ -16,6 +16,12 @@ func main() {
 		kgo.ConsumerGroup("orders-consumers"),
 		kgo.ConsumeTopics("orders"),
 		kgo.ConsumeResetOffset(kgo.NewOffset().AtStart()),
+		kgo.OnPartitionsAssigned(func(_ context.Context, _ *kgo.Client, assigned map[string][]int32) {
+			fmt.Printf("assigned: %v\n", assigned)
+		}),
+		kgo.OnPartitionsRevoked(func(_ context.Context, _ *kgo.Client, revoked map[string][]int32) {
+			fmt.Printf("revoked: %v\n", revoked)
+		}),
 	)
 	if err != nil {
 		log.Fatalf("failed to create client: %v", err)
