@@ -17,7 +17,7 @@ func main() {
 	}
 	defer client.Close()
 
-	keys := []string{"user-1", "user-2", "user-3"}
+	keys := []string{"user-1", "user-4", "user-8"}
 
 	var records []*kgo.Record
 	for i := 0; i < 9; i++ {
